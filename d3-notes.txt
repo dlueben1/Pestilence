@@ -1,0 +1,13 @@
+D3 goofs and notes
+
+bring in d3 from the website at <script src="https://d3js.org/d3.v4.min.js"></script>
+
+d3.scaleLinear() in v4 instead of d3.scale.linear() in v3
+
+to check for errors in chrome:
+	In Chrome,
+	Just press F12 and choose console tab
+	
+chrome doesn't like reading from local files, but firefox seems to work
+maybe this in cmd line 	> "C:\PathTo\Chrome.exe" --allow-file-access-from-files to get to run in chrome
+NOTE : add this as an alert in javascript if they plan on running in chrome

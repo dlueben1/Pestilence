@@ -23,7 +23,7 @@ var svg = d3.select("svg"),
     height = svg.attr("height") - margin.top - margin.bottom,
     g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-var parseTime = d3.timeParse("%Y%m%d");
+var parseTime = d3.timeParse("%Y");
 
 var x = d3.scaleTime().range([0, width]),
     y = d3.scaleLinear().range([height, 0]),
@@ -31,8 +31,8 @@ var x = d3.scaleTime().range([0, width]),
 
 var line = d3.line()
     .curve(d3.curveBasis)
-    .x(function(d) { return x(d.date); })
-    .y(function(d) { return y(d.Crude_Rate); }); // what do we want as our y axis?
+    .x(function(d) { return x(d.Year); })
+    .y(function(d) { return y(d.Deaths); }); // what do we want as our y axis?
 
 d3.tsv("Underlying Cause of Death.tsv", type, function(error, data) {
   if (error) throw error;
@@ -43,18 +43,18 @@ d3.tsv("Underlying Cause of Death.tsv", type, function(error, data) {
 	return{
 		id: id,
 		values: data.map(function(d) {
-        return {state: d.state, year: d.year, deaths:d.deaths, Population:d.Population,	Crude_Rate:d.Crude_Rate, Age_Adjusted_Rate:d.Age_Adjusted_Rate };
+        return {State: d.State, Year: d.Year, Deaths: d.Deaths};
 		 // map the data here. dont need state code
       })
 	};
   }); // diseases brought in
   
   // the x axis data 
-  x.domain(d3.extent(data, function(d) { return d.date; }));
+  x.domain(d3.extent(data, function(d) { return d.Year; }));
   
   y.domain([
-	d3.min(diseases, function(c){return d3.min(c.values, function(d){return d.diseases;}); }), // use the disease data on the y axis
-	d3.max(diseases, function(c){return d3.max(c.values, function(d){return d.diseases;}); })
+	d3.min(diseases, function(c){return d3.min(c.values, function(d){return d.Deaths;}); }), // use the disease data on the y axis
+	d3.max(diseases, function(c){return d3.max(c.values, function(d){return d.Deaths;}); })
   ]);
   
   z.domain(diseases.map(function(c) { return c.id; }));
@@ -86,7 +86,7 @@ d3.tsv("Underlying Cause of Death.tsv", type, function(error, data) {
   
   disease.append("text")
       .datum(function(d) { return {id: d.id, value: d.values[d.values.length - 1]}; })
-      .attr("transform", function(d) { return "translate(" + x(d.value.date) + "," + y(d.value.Crude_Rate) + ")"; })
+      .attr("transform", function(d) { return "translate(" + x(d.value.Year) + "," + y(d.value.Deaths) + ")"; })
       .attr("x", 3)
       .attr("dy", "0.35em")
       .style("font", "10px sans-serif")
@@ -95,7 +95,7 @@ d3.tsv("Underlying Cause of Death.tsv", type, function(error, data) {
 });
 
 function type(d, _, columns) {
-  d.date = parseTime(d.date);
+  d.date = parseTime(d.Year);
   for (var i = 1, n = columns.length, c; i < n; ++i) d[c = columns[i]] = +d[c];
   return d;
 }

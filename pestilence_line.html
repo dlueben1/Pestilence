@@ -23,7 +23,7 @@ var svg = d3.select("svg"),
     height = svg.attr("height") - margin.top - margin.bottom,
     g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-var parseTime = d3.timeParse("%Y");
+var parseTime = d3.timeParse("%Y"); // year format for time is ok by d3 standards
 
 var x = d3.scaleTime().range([0, width]),
     y = d3.scaleLinear().range([height, 0]),
@@ -39,25 +39,25 @@ d3.tsv("Underlying Cause of Death.tsv", type, function(error, data) {
 	
   // !!! All that sweet, sweet D3 code goes here
   
-  var diseases = data.columns.slice(1).map(function(id) {
+  var states = data.columns.slice(1).map(function(id) {
 	return{
 		id: id,
 		values: data.map(function(d) {
-        return {State: d.State, Year: d.Year, Deaths: d.Deaths};
+        return {State: d.State, Year: d.Year, Deaths: d.Deaths}; //   Crude_Rate: d[id]
 		 // map the data here. dont need state code
       })
 	};
   }); // diseases brought in
   
   // the x axis data 
-  x.domain(d3.extent(data, function(d) { return d.Year; }));
+  x.domain(d3.extent(data, function(d) { return d.Year; })); // this seems good
   
   y.domain([
-	d3.min(diseases, function(c){return d3.min(c.values, function(d){return d.Deaths;}); }), // use the disease data on the y axis
-	d3.max(diseases, function(c){return d3.max(c.values, function(d){return d.Deaths;}); })
+	d3.min(states, function(c){return d3.min(c.values, function(d){return d.Deaths;}); }), // use the disease data on the y axis
+	d3.max(states, function(c){return d3.max(c.values, function(d){return d.Deaths;}); })
   ]);
   
-  z.domain(diseases.map(function(c) { return c.id; }));
+  z.domain(states.map(function(c) { return c.id; }));
   
   g.append("g")
       .attr("class", "axis axis--x")
@@ -72,19 +72,19 @@ d3.tsv("Underlying Cause of Death.tsv", type, function(error, data) {
       .attr("y", 6)
       .attr("dy", "0.71em")
       .attr("fill", "#000")
-      .text("Disease, ยบF");  
+      .text("Diseases by Death Rate");  
 	  
-  var disease = g.selectAll(".disease")
-    .data(diseases)
+  var state = g.selectAll(".state")
+    .data(states)
     .enter().append("g")
-    .attr("class", "disease");
+    .attr("class", "state");
   
-  disease.append("path")
+  state.append("path") // this code makes the lines. super important
       .attr("class", "line")
       .attr("d", function(d) { return line(d.values); })
       .style("stroke", function(d) { return z(d.id); });
   
-  disease.append("text")
+  state.append("text") // this code will add the state name to the end of the lines
       .datum(function(d) { return {id: d.id, value: d.values[d.values.length - 1]}; })
       .attr("transform", function(d) { return "translate(" + x(d.value.Year) + "," + y(d.value.Deaths) + ")"; })
       .attr("x", 3)
@@ -95,7 +95,7 @@ d3.tsv("Underlying Cause of Death.tsv", type, function(error, data) {
 });
 
 function type(d, _, columns) {
-  d.date = parseTime(d.Year);
+  d.Year = parseTime(d.Year);
   for (var i = 1, n = columns.length, c; i < n; ++i) d[c = columns[i]] = +d[c];
   return d;
 }
